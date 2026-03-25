@@ -216,27 +216,49 @@ def main():
     # --- Creating events ---
     print("\n1. Creating a valid TranscriptionEvent:")
     event = TranscriptionEvent(
-        text="Worker reported unusual noise from compressor unit 7",
-        confidence=0.943,
+        text="Worker reported unusual noise from compressor unit 9",
+        confidence=0.5,
         audio_duration_seconds=4.2,
         client_id="client-metfab-01",
     )
+    event2 = DefectDetectedEvent(
+        SeverityLevel='low'
+    )
+    event3 = DefectDetectedEvent(
+        SeverityLevel='very_high'
+    )
+    print('1:')
     print(f"   Event ID:  {event.event_id}")
     print(f"   Subject:   {event.to_nats_subject()}")
     print(f"   Timestamp: {event.timestamp}")
     print(f"   Text:      {event.text}")
     print(f"   Conf:      {event.confidence}")
-
+    print('2')
+    print(f"   Severity:  {event2.SeverityLevel}")
+    print('3')
+    print(f"   Severity:  {event3.SeverityLevel}")
+    
     # --- Serialization (what goes on the wire to NATS) ---
     print("\n2. Serialized to JSON (this is what NATS transmits):")
     json_bytes = event.to_bytes()
-    print(f"   {json_bytes.decode()[:120]}...")
+    json_bytes2 = event2.to_bytes()
+    json_bytes3 = event3.to_bytes()
+    print(f"   1- {json_bytes.decode()[:120]}...")
+    print(f"   2- {json_bytes2.decode()[:120]}...")
+    print(f"   3- {json_bytes3.decode()[:120]}...")
 
     # --- Deserialization (what the consumer receives) ---
     print("\n3. Deserializing back from bytes:")
     restored = TranscriptionEvent.from_bytes(json_bytes)
-    print(f"   Text: {restored.text}")
+    restored2 = TranscriptionEvent.from_bytes(json_bytes2)
+    restored3 = TranscriptionEvent.from_bytes(json_bytes3)
+    print(f"1- Text: {restored.text}")
     print(f"   Same event? {restored.event_id == event.event_id}")
+    print(f"2- Text: {restored.text}")
+    print(f"   Same event? {restored2.event_id == event2.event_id}")
+    print(f"3- Text: {restored.text}")
+    print(f"   Same event? {restored3.event_id == event3.event_id}")
+
 
     # --- Validation catches bad data ---
     print("\n4. Validation in action — trying invalid confidence (1.5):")
